@@ -45,6 +45,7 @@ ln -s ~/M1O-skills/skills ~/.claude/skills
 | Skill | Zweck |
 | --- | --- |
 | [`new-skill`](skills/new-skill/SKILL.md) | Legt einen neuen Skill in diesem Repo an |
+| [`audit-skill-link`](skills/audit-skill-link/SKILL.md) | Prüft geteilte Skill-Links auf Sicherheit und übernimmt sie zweisprachig (DE/EN) ins Repo |
 
 ## Neuen Skill hinzufügen
 
