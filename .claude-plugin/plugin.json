@@ -1,0 +1,8 @@
+{
+  "name": "m1o-skills",
+  "description": "Skill-Sammlung von MokshaOne für Claude",
+  "version": "0.1.0",
+  "author": { "name": "MokshaOne" },
+  "repository": "https://github.com/MokshaOne/M1O-skills",
+  "license": "GPL-3.0"
+}
