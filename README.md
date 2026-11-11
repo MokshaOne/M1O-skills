@@ -9,9 +9,15 @@ Jeder Unterordner in `skills/` ist ein Skill mit einer `SKILL.md`.
 .claude-plugin/
   plugin.json        Plugin-Manifest (m1o-skills)
   marketplace.json   Marketplace-Eintrag (mokshaone)
-.claude/skills       Symlink auf skills/ – Skills sind aktiv, sobald Claude in diesem Repo läuft
+.claude/
+  skills             Symlink auf skills/ – Skills sind aktiv, sobald Claude in diesem Repo läuft
+  settings.json      Stop-Hook für den Auto-Push
+scripts/
+  new-skill.sh       legt einen neuen Skill in einem eigenen Unterordner an
+  check-skills.sh    prüft die Ordnerstruktur
+  auto-push.sh       committet und pusht Skill-Änderungen
 skills/
-  <name>/SKILL.md    ein Skill pro Ordner
+  <name>/SKILL.md    jeder Skill in seinem eigenen Unterordner
 ```
 
 ## Installation
@@ -42,11 +48,23 @@ ln -s ~/M1O-skills/skills ~/.claude/skills
 
 ## Neuen Skill hinzufügen
 
-1. Ordner `skills/<name>/` mit einer `SKILL.md` anlegen (Frontmatter `name` und `description`, danach die Anweisungen).
-2. Skill in die Tabelle oben eintragen.
-3. Mit `claude plugin validate .` prüfen.
+```bash
+scripts/new-skill.sh mein-skill "Was der Skill tut und wann Claude ihn nutzen soll"
+```
 
-Oder in Claude einfach `/new-skill` aufrufen.
+Das legt den Unterordner `skills/mein-skill/` mit einer `SKILL.md` an und trägt den Skill in die Tabelle oben ein. In Claude geht dasselbe mit `/new-skill`.
+
+Regel: Jeder Skill liegt in einem eigenen Unterordner `skills/<name>/`, und `name` in der `SKILL.md` entspricht dem Ordnernamen. `scripts/check-skills.sh` prüft das.
+
+## Auto-Push
+
+Wenn Claude in diesem Repo eine Antwort beendet, läuft über den Stop-Hook in `.claude/settings.json` das Skript `scripts/auto-push.sh`:
+
+1. Es prüft die Ordnerstruktur. Bei Fehlern wird nichts committet, und Claude bekommt die Fehler zurückgemeldet.
+2. Es committet Änderungen unter `skills/` und an `README.md` als `skills: update <namen>`.
+3. Es pusht den aktuellen Branch nach `origin`. Schlägt der Push fehl, bleiben die Commits lokal und der nächste Lauf versucht es erneut.
+
+Ohne Claude lässt sich das Skript auch direkt aufrufen: `scripts/auto-push.sh`.
 
 ## Lizenz
 
