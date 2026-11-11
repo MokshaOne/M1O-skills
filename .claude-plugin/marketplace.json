@@ -1,0 +1,12 @@
+{
+  "name": "mokshaone",
+  "description": "Skills von MokshaOne für Claude",
+  "owner": { "name": "MokshaOne" },
+  "plugins": [
+    {
+      "name": "m1o-skills",
+      "source": "./",
+      "description": "Skill-Sammlung von MokshaOne für Claude"
+    }
+  ]
+}
