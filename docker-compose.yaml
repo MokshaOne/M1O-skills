@@ -1,0 +1,50 @@
+# M10 CMS — Portainer Stack (Ugreen UGOS / NAS)
+# Deploy: Portainer → Stacks → Add Stack → paste this + set env vars
+
+services:
+  m1o-cms-db:
+    image: postgres:16-alpine
+    container_name: m1o-cms-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: m10cms
+      POSTGRES_USER: m10cms
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?required}
+    volumes:
+      - /volume1/docker/Data/m1o-cms/postgres:/var/lib/postgresql/data
+    networks:
+      - cms_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U m10cms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  m1o-cms:
+    image: ghcr.io/mokshaone/m10-cms:latest
+    container_name: m1o-cms
+    restart: unless-stopped
+    depends_on:
+      m1o-cms-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://m10cms:${DB_PASSWORD}@m1o-cms-db:5432/m10cms
+      JWT_SECRET: ${JWT_SECRET:?required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?required}
+      PORT: "3000"
+      MEDIA_DIR: /app/media
+      CORS_ORIGINS: https://m1o.at,https://raveenthiran.m1o.at
+    volumes:
+      - /volume1/docker/Data/m1o-cms/media:/app/media
+    networks:
+      - cms_net
+      - m1o_proxy
+    labels:
+      - "cloudflared.hostname=cms.m1o.at"
+      - "cloudflared.service=http://m1o-cms:3000"
+
+networks:
+  cms_net:
+    driver: bridge
+  m1o_proxy:
+    external: true
