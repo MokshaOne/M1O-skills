@@ -27,7 +27,7 @@ app.use(cors({ origin: process.env.CORS_ORIGINS?.split(',') || '*' }));
 app.use(express.json({ limit: '10mb' }));
 
 // Health check (always available)
-app.get('/health', (req, res) => res.json({ status: 'ok', version: '1.0.1' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', version: '1.0.2' }));
 
 // Setup routes (available before install, locked after)
 app.use('/api/setup', setupRoutes);

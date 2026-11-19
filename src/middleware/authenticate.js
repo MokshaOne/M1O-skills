@@ -70,7 +70,7 @@ export async function requireApiKey(req, res, next) {
 
   const prefix = key.slice(0, 12);
   const { rows } = await query(
-    `SELECT ak.key_hash, s.id, s.slug, s.name, s.domain, s.config
+    `SELECT ak.key_hash, s.id, s.slug, s.name, s.domain, s.settings
      FROM api_keys ak
      JOIN sites s ON s.id = ak.site_id
      WHERE ak.key_prefix = $1 AND ak.is_active = true`,
@@ -84,7 +84,7 @@ export async function requireApiKey(req, res, next) {
         slug: row.slug,
         name: row.name,
         domain: row.domain,
-        config: row.config,
+        settings: row.settings,
       };
       return next();
     }
