@@ -51,6 +51,10 @@ app.use('/api', async (req, res, next) => {
 // Sync API (token-authed, independent of user login)
 app.use('/api/sync', syncRoutes);
 
+// Public read API (before admin routes — admin routers use global requireAuth
+// which would intercept /api/v1/* requests if mounted first)
+app.use('/api/v1', publicRoutes);     // /api/v1/:siteSlug/:typeSlug[/:entrySlug]
+
 // Admin API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/sites', siteRoutes);
@@ -58,9 +62,6 @@ app.use('/api', contentTypeRoutes);  // /api/sites/:siteId/content-types
 app.use('/api', entryRoutes);         // /api/sites/:siteId/entries
 app.use('/api', mediaRoutes);         // /api/sites/:siteId/media + /media/:filename (public)
 app.use('/api', webhookRoutes);       // /api/sites/:siteId/webhooks
-
-// Public read API
-app.use('/api/v1', publicRoutes);     // /api/v1/:siteSlug/:typeSlug[/:entrySlug]
 
 // Register webhook dispatch on content events
 const webhookEvents = [
