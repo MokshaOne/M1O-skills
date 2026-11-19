@@ -1,7 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import 'dotenv/config';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import setupRoutes from './routes/setup.js';
 import syncRoutes from './routes/sync.js';
@@ -22,12 +26,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Global middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Admin SPA needs inline scripts from Vite build
+}));
 app.use(cors({ origin: process.env.CORS_ORIGINS?.split(',') || '*' }));
 app.use(express.json({ limit: '10mb' }));
 
 // Health check (always available)
-app.get('/health', (req, res) => res.json({ status: 'ok', version: '1.0.2' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', version: '1.1.0' }));
 
 // Setup routes (available before install, locked after)
 app.use('/api/setup', setupRoutes);
@@ -100,6 +106,13 @@ async function loadPlugins() {
     // No plugins directory — that's fine
   }
 }
+
+// Admin SPA — serve built Vue app from /admin
+const adminPath = join(__dirname, '..', 'dist', 'admin');
+app.use('/admin', express.static(adminPath));
+app.get('/admin/*', (req, res) => {
+  res.sendFile(join(adminPath, 'index.html'));
+});
 
 // Global error handler
 app.use((err, req, res, _next) => {
