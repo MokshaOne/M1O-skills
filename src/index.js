@@ -110,7 +110,7 @@ async function loadPlugins() {
 // Admin SPA — serve built Vue app from /admin
 const adminPath = join(__dirname, '..', 'dist', 'admin');
 app.use('/admin', express.static(adminPath));
-app.get('/admin/*', (req, res) => {
+app.get('/admin/{*splat}', (req, res) => {
   res.sendFile(join(adminPath, 'index.html'));
 });
 
