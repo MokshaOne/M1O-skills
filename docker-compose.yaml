@@ -21,7 +21,7 @@ services:
       retries: 5
 
   m1o-cms:
-    image: ghcr.io/mokshaone/m10-cms:latest
+    image: ghcr.io/mokshaone/m1o-skills:main
     container_name: m1o-cms
     restart: unless-stopped
     depends_on:
