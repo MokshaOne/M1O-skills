@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import slugify from 'slugify';
+import bcrypt from 'bcrypt';
+import { nanoid } from 'nanoid';
 import { query } from '../db/pool.js';
 import { requireAuth, requireSuperAdmin } from '../middleware/authenticate.js';
 import { hooks } from '../lib/hooks.js';
@@ -68,6 +70,36 @@ router.put('/:id', requireSuperAdmin, async (req, res) => {
 
   await hooks.run('site.updated', rows[0]);
   res.json(rows[0]);
+});
+
+/** POST /api/sites/:id/api-keys — generate a new API key (super_admin only) */
+router.post('/:id/api-keys', requireSuperAdmin, async (req, res) => {
+  const { name } = req.body;
+  const siteId = req.params.id;
+
+  const { rows: siteRows } = await query('SELECT id, name FROM sites WHERE id = $1', [siteId]);
+  if (!siteRows.length) return res.status(404).json({ error: 'Site not found' });
+
+  const keyName = name || `${siteRows[0].name} API Key`;
+  const apiKey = `m10_${nanoid(32)}`;
+  const keyHash = await bcrypt.hash(apiKey, 10);
+
+  await query(
+    `INSERT INTO api_keys (site_id, name, key_hash, key_prefix)
+     VALUES ($1, $2, $3, $4)`,
+    [siteId, keyName, keyHash, apiKey.slice(0, 12)]
+  );
+
+  res.status(201).json({ apiKey, name: keyName, prefix: apiKey.slice(0, 12) });
+});
+
+/** GET /api/sites/:id/api-keys — list keys for a site (super_admin only) */
+router.get('/:id/api-keys', requireSuperAdmin, async (req, res) => {
+  const { rows } = await query(
+    `SELECT id, name, key_prefix, is_active, created_at FROM api_keys WHERE site_id = $1 ORDER BY created_at`,
+    [req.params.id]
+  );
+  res.json(rows);
 });
 
 /** DELETE /api/sites/:id — super_admin only */
